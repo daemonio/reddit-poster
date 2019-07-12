@@ -42,7 +42,7 @@ except:
     sys.exit(0)
 
 BOT_NAME = 'alface'
-reddit = praw.Reddit(BOT_NAME, user_agent='script powered by u/yorian_dates')
+reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
 print '[+] PRAW: connect as: ', reddit.user.me()
 
 sub = reddit.subreddit(sub_name)
@@ -54,6 +54,7 @@ for i in sub.search(term, limit=30):
     title  = i.title.encode('utf-8')
     score  = i.score
     author = i.author
+    url    = i.url
 
-    print 'Title: {0}\nScore: {1}\nAuthor: {2}\nPosted: {3} {4} ago\n\n'.format(
-            title, score, author, d1, d2)
+    print 'Title: {0}\nUrl: {1}\nScore: {2}\nAuthor: {3}\nPosted: {4} {5} ago\n\n'.format(
+            title, url, score, author, d1, d2)

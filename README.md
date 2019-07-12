@@ -19,7 +19,7 @@ I put my PRAW configuration in `~/.config/praw.ini`. Here's a example of the fil
     username=
 
 Fill the missing values with your own configuration. Don't forget to set the `BOT_NAME`
-in `poster.py` (for this example `BOT_NAME='mybot'`)
+in `poster.py` and in `search.py` (for this example `BOT_NAME='mybot'`)
 
 # How to use
 
