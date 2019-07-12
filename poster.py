@@ -282,6 +282,7 @@ while True:
                 if schedule == 'best':
                     print 'Updating timestamp'
                     if DRY_RUN:
+                        # set any timestamp on dry run.
                         new_timestamp = time.time() + 60*2
                     else:
                         new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
@@ -306,7 +307,7 @@ while True:
         elif status == 'waiting' and actual_timestamp > timestamp:
             print 'Posted.'
             if DRY_RUN == False:
-                #reddit_submit(reddit, subreddit, title, url)
+                reddit_submit(reddit, subreddit, title, url)
                 pass
 
             RDB.update_field(key, 'status', 'posted')
