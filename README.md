@@ -69,13 +69,16 @@ and 15 hours.
 In other words, the BEST time to post is to wait a "highly upvoted" post to get at least 15
 hours old. Again, this is a heuristic so of course it can fail sometimes.
 
-The calculation is simple. Being "score" the amount of upvotes, IF `created_utc` is below 15 AND
-the division `score/created_utc` is above 100 which means 100 upvotes per hour, the minimum rate for
+The calculation is simple. Being "score" the amount of upvotes, IF `created_utc`\* is below 15 hours AND
+the division `score/created_utc` is above 100, which means 100 upvotes per hour -- the minimum rate for
 being considered a "highly upvoted" THEN schedule the post to `(15 - created_utc)` hours from now.
+
 The best time to post is to wait a "highly upvoted" post to get at least 15 hours old. Of course if there
 is no "highly upvoted" at the moment the script will just post immediately. Also, if your post is competing
 with new posts, any of these new posts can grow bigger than yours. This can't be avoided -- except to delay
 the posting time even more, which the script doesn't do.
+
+\* : In reality `created_utc` is in seconds, but as an example consider it as time in hours.
 
 # Database 'reddit.db'
 
