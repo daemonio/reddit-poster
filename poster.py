@@ -238,7 +238,7 @@ if len(sys.argv) > 1:
     if sys.argv[1] == '--dry-run':
         DRY_RUN = True
 
-# Decrease time for test proposes.
+# Decrease time for test purposes.
 if DRY_RUN:
     SLEEP_BETWEEN_POSTS = 10
     SLEEP_LOOP          = 10
