@@ -48,7 +48,7 @@ Second post will be delayed to be posted after the first one. This is what "foll
 The third post will be posted when the main loop hits it, that is, as soon as possible.
 
 Let's say the first post will be schedule 4 hours from here. The posting sequence will
-be: third post after 0 seconds, first post after 4 hours, second posts after 2 minutes.
+be: third post after 0 seconds, first post after 4 hours, second posts after 4h and 2 minutes.
 
 Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors from PRAW.
 
