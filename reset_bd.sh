@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# Use this to "reste" the database.
+# Use this to "reset" the database.
 
 cp -f reddit.db-clean reddit.db

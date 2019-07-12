@@ -40,9 +40,6 @@ SLEEP_BETWEEN_POSTS = 10 # 2 min
 #SLEEP_LOOP          = 300 # 5 min
 SLEEP_LOOP          = 10 # 5 min
 POST_FILE           = 'postfile.txt'
-PUSHIT_SEARCH       = 'https://api.pushshift.io/reddit/search/submission/'\
-                      '?q=&subreddit={0}&fields=title,created_utc,score'\
-                      '&after={1}&before={2}'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
 #TIME_POST_SAME_SUB  = 7200
 TIME_POST_SAME_SUB  = 300 
@@ -265,7 +262,7 @@ while True:
     praw_renew_time = praw_renew_time % PRAW_RENEW_AUTH
 
     if praw_renew_time == 0:
-        reddit = praw.Reddit(BOT_NAME, user_agent='script powered by u/yorian_dates')
+        reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
         print '[+] PRAW: connect as: ', reddit.user.me()
 
     if OLDMTIME != os.path.getmtime(POST_FILE):
