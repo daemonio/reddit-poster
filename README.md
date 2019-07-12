@@ -1,5 +1,5 @@
 # reddit-poster
-Python scripts to schedule posting in reddit. It includes a simple heuristic to schedule the best time to post.
+Python script to schedule a post in reddit. It includes a simple heuristic to schedule the best time to post.
 
 # How to use
 
@@ -54,3 +54,9 @@ The DB is a file under sqlite3 format. Its schema is simple, just type:
     sqlite3 reddit.db '.schema'
 
 To learn more about sqlite3 on python to search it up in duckduckgo.
+
+# search.py
+
+This the reddit search engine in a script form. I use it before posting to avoid reposts.
+
+    search.py natureismetal 'honey+badger+snake'
