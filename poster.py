@@ -329,14 +329,12 @@ while True:
 
             if len(t_follow) > 0:
                 t_status, t_schedule = t_follow[0]
-                print '------------------------------------------: ', t_follow
 
                 if t_status == 'ignored' and t_schedule == 'follow':
                     # Just make sure that the follow post has
                     # timestamp less than the above post.
                     RDB.update_field(key+1, 'status', 'waiting')
                     RDB.update_field(key+1, 'timestamp', timestamp)
-                    print 'okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk follow'
 
             countdown('Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
         elif status == 'skip' and actual_timestamp > timestamp:
