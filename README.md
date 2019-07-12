@@ -28,7 +28,7 @@ no pending posts.
 
 2) Add your posts to `postfile.txt` using this sintaxe:
 
-    subreddit_name\~title of the post~link of the post~schedule
+    subreddit_name\~title of the post\~link of the post\~schedule
 
 symbol "\~" is the field separator and "schedule" can be:
 
