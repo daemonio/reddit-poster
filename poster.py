@@ -9,39 +9,12 @@ import os
 import sqlite3
 from datetime import datetime
 
-# queue
-# waiting
-# posted
-# skip
-# ignored
-
-# skip when we have two posts in the sub and the
-# first post is a "best", that means that the second post
-# has to wait until the first one is rising.
-
-# ignored is used for "follow" the post just stay there.
-
-# type
-# anytime
-# best
-# follow
-
-# status
-# schedule
-# subreddit
-# title
-# url
-# tim
-
 # TODO: Constants. Make sure to put this on
 # separeted classes/files.
-#SLEEP_BETWEEN_POSTS = 120 # 2 min
-SLEEP_BETWEEN_POSTS = 10 # 2 min
-#SLEEP_LOOP          = 300 # 5 min
-SLEEP_LOOP          = 10 # 5 min
+SLEEP_BETWEEN_POSTS = 120 # 2 min
+SLEEP_LOOP          = 300 # 5 min
 POST_FILE           = 'postfile.txt'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
-#TIME_POST_SAME_SUB  = 7200
 TIME_POST_SAME_SUB  = 300 
 
 class DB:
@@ -187,8 +160,8 @@ def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
 
         # submissions are already in order (the most recent first).
         # the first who matches will bring the longest timestamp.
+        # TODO: using 88 instead of 100.
         if hour < 15 and (score/hour) > 88:
-            #print 'ACHOU: {0} + {1} + {2}'.format(current_timestamp, (15 - hour)*3600, 2*60)
             best_timestamp = current_timestamp + (15 - hour)*3600 + 2*60
 
             break
@@ -238,7 +211,6 @@ def show_info(RDB):
 
     print '[+] Next Auth renew: ', datetime.fromtimestamp(time.time() + PRAW_RENEW_AUTH)
 
-
 #
 # MAIN
 #
@@ -257,6 +229,20 @@ POSTS_LIST = []
 
 # inc every time.
 praw_renew_time = 0
+
+DRY_RUN = False
+
+# --dry-run: for testing. NOTHING will be posted to reddit,
+# but the database will be compromised. Use ./reset_database.sh.
+if len(sys.argv) > 1:
+    if sys.argv[1] == '--dry-run':
+        DRY_RUN = True
+
+# Decrease time for test proposes.
+if DRY_RUN:
+    SLEEP_BETWEEN_POSTS = 10
+    SLEEP_LOOP          = 10
+    TIME_POST_SAME_SUB  = 60 
 
 while True:
     praw_renew_time = praw_renew_time % PRAW_RENEW_AUTH
@@ -295,9 +281,10 @@ while True:
 
                 if schedule == 'best':
                     print 'Updating timestamp'
-                    #new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
-                    new_timestamp = time.time() + 60*2
-                    #new_timestamp = time.time() + SLEEP_BETWEEN_POSTS
+                    if DRY_RUN:
+                        new_timestamp = time.time() + 60*2
+                    else:
+                        new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
 
                     # If we're posting in the subreddit we have to "wait" at least 2h when using
                     # "best" since the previous best can be rising and gaining upvotes.
@@ -318,7 +305,10 @@ while True:
                 print 'No update. A post for r/'+subreddit+' is already scheduled.'
         elif status == 'waiting' and actual_timestamp > timestamp:
             print 'Posted.'
-            #reddit_submit(reddit, subreddit, title, url)
+            if DRY_RUN == False:
+                #reddit_submit(reddit, subreddit, title, url)
+                pass
+
             RDB.update_field(key, 'status', 'posted')
 
             query_follow = 'select status,schedule from reddit where id=?'
