@@ -34,9 +34,9 @@ symbol "\~" is the field separator and "schedule" can be:
 
     best    : heuristic to decide the best time to post.
     anytime : post as soon as possible
-    follow  : post after the the post above in the file
+    follow  : post after some post -- the one above it in the `postfile.txt`.
 
-Example:
+Example of `postfile.txt`:
 
     dankmemes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~best
     pics~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~follow
