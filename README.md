@@ -43,7 +43,7 @@ Example of `postfile.txt`:
     pics~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~follow
     dank_memes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~anytime
 
-First post is "best" so it will be post when it's the best time to do so (see below).
+First post is "best" so it will be posted when it's the best time to do so (see below).
 Second post will be delayed to be posted after the first one. This is what "follow" means.
 The third post will be posted when the main loop hits it, that is, as soon as possible.
 
@@ -86,7 +86,7 @@ The DB is a file under sqlite3 format. Its schema is simple, just type:
 
     sqlite3 reddit.db '.schema'
 
-To learn more about sqlite3 on python to search it up in duckduckgo.
+To learn more about using sqlite3 in python just search it up in duckduckgo.
 
 # search.py
 
