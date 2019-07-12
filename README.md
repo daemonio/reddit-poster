@@ -4,7 +4,7 @@ Python scripts to schedule posting in reddit. It includes a simple heuristic to 
 # How to use
 
 1) Run `poster.py` and wait. The scripts watches the file `postfile.txt` for new posts.
-2) Add your posts to `postsfile.txt` using this sintaxe:
+2) Add your posts to `postfile.txt` using this sintaxe:
 
     subreddit_name~title of the post~link of the post~schedule
 
@@ -16,13 +16,13 @@ symbol "\~" is the field separator and "schedule" can be:
 
 Example:
 
-    sub1~title_1~gfycat_1~best
-    sub2~title_2~gfycat_2~follow
-    sub3~title_3~gfycat_3~anytime
+    dankmemes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~best
+    pics~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~follow
+    dank_memes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~anytime
 
-"title\_1" will be post to "sub1" when it is the best time to do so. Second
-post will be delayed to be post after "title\_1" since we're using "follow"
-schedule. "title\_3" will be post as soon as poosible to "sub3".
+First post is "best" so it will be post when it's the time to do so (see below). Second
+Second post will be delayed to be posted after the first one. This is what follow means.
+The third post will be posted when the main loop hit it, that is, as soon as possible.
 
 # How "best" schedule work
 
@@ -46,3 +46,11 @@ is above 100 which means 100 upvotes per hour, the minimum rate for being consid
 "highly upvoted" post THEN schedule the post to `(15 - created_utc)` hours from now. The best
 time to post is to wait a "highly upvoted" post to get at least 15 hours old. Of course ff there
 is no "highly upvoted" at the moment just post right away.
+
+# Database 'reddit.db'
+
+The DB is a file under sqlite3 format. Its schema is simple, just type:
+
+    sqlite3 reddit.db '.schema'
+
+To learn more about sqlite3 on python to search it up in duckduckgo.
