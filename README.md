@@ -10,7 +10,7 @@ Python script to schedule a post in reddit. It includes a simple heuristic to sc
 
 # Praw config
 
-I put my PRAW configuration in ~/.config/praw.ini . Here's a example of the file:
+I put my PRAW configuration in `~/.config/praw.ini`. Here's a example of the file:
 
     [mybot]
     client_id=
