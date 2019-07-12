@@ -27,7 +27,7 @@ in `poster.py` and in `search.py` (for this example `BOT_NAME='mybot'`)
 This script will run infinitely. Hit `ctrl+c` whenever you like, just make sure that there's
 no pending posts.
 
-2) Add your posts to `postfile.txt` using this sintaxe:
+2) Add your posts to `postfile.txt` using this syntaxe:
 
     subreddit_name\~title of the post\~link of the post\~schedule
 
