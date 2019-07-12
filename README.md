@@ -31,16 +31,16 @@ upvoted post in a timeframe of 15 hours. That is, when a post is being
 highly upvoted, new posts will not grow as much because of the algorithm.
 
 Let's say r/pics have a post with 10k upvotes in 4 hours. If you post something
-new it will rarely grow but if you post the same thing after 15 hours, the
-post will get more karma -- or be the new "highly upvoted" post of the time.
+new it will rarely grow but if you post the same thing after 11 hours, the
+post will get more karma -- or be the new "highly upvoted" post.
 
 So the WORST time to post to a sub, if one wants as karma as possible, is
 to post when a "highly upvoted" post is growing between its post time (also called created\_utc time)
 and 15 hours.
 
-In other words, the BEST time to post is to wait a "highly upvoted" post to get 15
+In other words, the BEST time to post is to wait a "highly upvoted" post to get at least 15
 hours old. Again, this is a heuristic so of course it can fail sometimes.
 
-The calculation is simple, IF `score/created\_utc` is above 100 which means 100 upvotes
-per hour, the minimum rate for being considered a "highly upvoted" post THEN schedule the
-post to (15 - created\_utc) hours from now.
+The calculation is simple and being "score" the amount of upvotes, IF the division `score/created_utc`
+is above 100 which means 100 upvotes per hour, the minimum rate for being considered a
+"highly upvoted" post THEN schedule the post to `(15 - created_utc)` hours from now.
