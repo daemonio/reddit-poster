@@ -41,6 +41,8 @@ and 15 hours.
 In other words, the BEST time to post is to wait a "highly upvoted" post to get at least 15
 hours old. Again, this is a heuristic so of course it can fail sometimes.
 
-The calculation is simple and being "score" the amount of upvotes, IF the division `score/created_utc`
+The calculation is simple. Being "score" the amount of upvotes, IF the division `score/created_utc`
 is above 100 which means 100 upvotes per hour, the minimum rate for being considered a
-"highly upvoted" post THEN schedule the post to `(15 - created_utc)` hours from now.
+"highly upvoted" post THEN schedule the post to `(15 - created_utc)` hours from now. The best
+time to post is to wait a "highly upvoted" post to get at least 15 hours old. Of course ff there
+is no "highly upvoted" at the moment just post right away.
