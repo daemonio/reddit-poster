@@ -3,7 +3,7 @@ Python script to schedule a post in reddit. It includes a simple heuristic to sc
 
 # How to use
 
-1) Run `poster.py` and wait. The scripts watches the file `postfile.txt` for new posts.
+1) Run `./poster.py` and wait. The scripts watches the file `postfile.txt` for new posts.
 2) Add your posts to `postfile.txt` using this sintaxe:
 
     subreddit_name~title of the post~link of the post~schedule
@@ -20,9 +20,14 @@ Example:
     pics~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~follow
     dank_memes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~anytime
 
-First post is "best" so it will be post when it's the time to do so (see below). Second
-Second post will be delayed to be posted after the first one. This is what follow means.
-The third post will be posted when the main loop hit it, that is, as soon as possible.
+First post is "best" so it will be post when it's the best time to do so (see below).
+Second post will be delayed to be posted after the first one. This is what "follow" means.
+The third post will be posted when the main loop hits it, that is, as soon as possible.
+
+Let's say the first post will be schedule 4 hours from here. The posting sequence will
+be: third post after 0 seconds, first post after 4 hours, second posts after 2 minutes.
+
+Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors from PRAW.
 
 # How "best" schedule work
 
@@ -59,4 +64,4 @@ To learn more about sqlite3 on python to search it up in duckduckgo.
 
 This the reddit search engine in a script form. I use it before posting to avoid reposts.
 
-    search.py natureismetal 'honey+badger+snake'
+    ./search.py natureismetal 'honey+badger+snake'
