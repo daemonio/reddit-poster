@@ -80,7 +80,7 @@ So the WORST time to post to a sub, if one wants more karma as possible, is
 to post when a "highly upvoted" post is growing between its post time (also called created\_utc time)
 and 15 hours.
 
-In other words, the BEST time to post is to wait a "highly upvoted" post to get at least 15
+In other words, the BEST time to post is to wait a "highly upvoted" post to be at least 15
 hours old. Again, this is a heuristic so of course it can fail sometimes.
 
 The calculation is simple. Being "score" the amount of upvotes, IF `created_utc` [1] is below 15 hours AND
@@ -97,7 +97,7 @@ the posting time even more, which the script doesn't do.
 [2] : This value can vary between subs. The 100 value is kinda low so it can produce many "false-postives",
 that is, posts that seem to be highly upvoted but they're not. If the sub averages 5k or lower upvotes
 for the most upvoted post in a day, the 100 value works great. Big subs that averages 20k or more, this
-value must be changed accordingly. a^b
+value must be changed accordingly.
 
 # Database 'reddit.db'
 

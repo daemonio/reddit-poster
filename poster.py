@@ -21,6 +21,7 @@ SLEEP_LOOP          = 300 # 5 min
 POST_FILE           = 'postfile.txt'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
 TIME_POST_SAME_SUB  = 300 
+DRY_RUN_BEST_TIME   = 120  # only when using --dry-run
 
 class DB:
     def __init__(self, DB_FILE):
@@ -178,7 +179,7 @@ def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
     current_timestamp = time.time()
 
     # off by 2 minutes
-    best_timestamp = current_timestamp + 2*60
+    best_timestamp = current_timestamp #+ 2*60
 
     for submission in sub.new(limit=limit_new):
         score   = submission.score
@@ -284,7 +285,7 @@ praw_renew_time = 0
 if DRY_RUN:
     SLEEP_BETWEEN_POSTS = 10
     SLEEP_LOOP          = 10
-    TIME_POST_SAME_SUB  = 60 
+    TIME_POST_SAME_SUB  = 120 
 
 while True:
     praw_renew_time = praw_renew_time % PRAW_RENEW_AUTH
@@ -324,7 +325,7 @@ while True:
                 if schedule == 'best':
                     if DRY_RUN:
                         # set any timestamp on dry run.
-                        new_timestamp = time.time() + 60*2
+                        new_timestamp = time.time() + DRY_RUN_BEST_TIME
                     else:
                         new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
 
@@ -336,7 +337,7 @@ while True:
 
                     if t_timestamp != None and (actual_timestamp - t_timestamp) < TIME_POST_SAME_SUB:
                         new_timestamp += TIME_POST_SAME_SUB
-                        MyPrint.alert('[+] Skipping until: ' + TIME_POST_SAME_SUB)
+                        MyPrint.alert('[+] Skipping until: ' + str(TIME_POST_SAME_SUB))
                         RDB.update_field(key, 'status', 'skip')
                 elif schedule == 'follow':
                     # TODO: follow as first post should act like anytime
@@ -359,16 +360,26 @@ while True:
             RDB.update_field(key, 'status', 'posted')
 
             query_follow = 'select status,schedule from reddit where id=?'
-            t_follow = RDB.select(query_follow, (key+1,))
 
-            if len(t_follow) > 0:
-                t_status, t_schedule = t_follow[0]
+            # Loop to treat multiple "follows".
+            key_next = key + 1
+            while True:
+                t_follow = RDB.select(query_follow, (key_next,))
 
-                if t_status == 'ignored' and t_schedule == 'follow':
-                    # Just make sure that the follow post has
-                    # timestamp less than the above post.
-                    RDB.update_field(key+1, 'status', 'waiting')
-                    RDB.update_field(key+1, 'timestamp', timestamp)
+                if len(t_follow) > 0:
+                    t_status, t_schedule = t_follow[0]
+
+                    if t_status == 'ignored' and t_schedule == 'follow':
+                        # Just make sure that the follow post has
+                        # timestamp less than the above post.
+                        RDB.update_field(key_next, 'status', 'waiting')
+                        RDB.update_field(key_next, 'timestamp', timestamp)
+                    else:
+                        break
+                else:
+                    break
+
+                key_next += 1
 
             countdown(MyPrint, 'Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
         elif status == 'skip' and actual_timestamp > timestamp:
