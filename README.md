@@ -59,10 +59,14 @@ Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors 
 
 # Dry run
 
-Pass the --dry-run to tell the script to not update anything or post anything. This option
+Pass the --dry-run option to tell the script to not update anything or post anything. This option
 is for testing purposes.
 
     ./poster.py --dry-run
+
+Nothing will be modified or posted to reddit except the creation of a database named
+`redditdryrun.db`. You can also use "fake" subreddit names here to test the script like
+"sub1", "sub2", etc.
 
 # More on Schedules
 
