@@ -37,7 +37,7 @@ symbol "\~" is the field separator and "schedule" can be:
     best     : heuristic to decide the best time to post.
     anytime  : post as soon as possible
     follow   : post after some post -- the one above it in the `postfile.txt`.
-    +t[smhd] : tradicional schedule. Post after "t" time has passed.
+    +t[smhd] : tradicional scheduling. Post after "t" time have passed.
 
 Example of `postfile.txt`:
 
@@ -60,9 +60,9 @@ Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors 
 # More on Schedules
 
 To schedule a post you have 4 options: best, follow, anytime, +t[smhd]. "Best" is explained below.
-"Follow" submit a post after the post above it. "Anytime" is the same as "immediately".
+"Follow" submit a post after the post above it. "Anytime" is the same as immediately.
 
-"+t[smhd]" is the tradicional time schedule. If you put +1h the post will be submitted after
+"+t[smhd]" is the tradicional time scheduling. If you put +1h the post will be submitted after
 one hour from current time. Suffixes are 's', 'm', 'h', 'd' for seconds, minutes, hours and
 days, repectively.
 
@@ -76,15 +76,15 @@ Let's say r/pics have a post with 10k upvotes in 4 hours. If you post something
 new it will rarely grow but if you post the same thing after 11 hours, the
 post will get more karma -- or be the new "highly upvoted" post.
 
-So the WORST time to post to a sub, if one wants as karma as possible, is
+So the WORST time to post to a sub, if one wants more karma as possible, is
 to post when a "highly upvoted" post is growing between its post time (also called created\_utc time)
 and 15 hours.
 
 In other words, the BEST time to post is to wait a "highly upvoted" post to get at least 15
 hours old. Again, this is a heuristic so of course it can fail sometimes.
 
-The calculation is simple. Being "score" the amount of upvotes, IF `created_utc`\* is below 15 hours AND
-the division `score/created_utc` is above 100, which means 100 upvotes per hour -- the minimum rate for
+The calculation is simple. Being "score" the amount of upvotes, IF `created_utc` [1] is below 15 hours AND
+the division `score/created_utc` is above 100 [2], which means 100 upvotes per hour -- the minimum rate for
 being considered a "highly upvoted" THEN schedule the post to `(15 - created_utc)` hours from now.
 
 The best time to post is to wait a "highly upvoted" post to get at least 15 hours old. Of course if there
@@ -92,7 +92,12 @@ is no "highly upvoted" at the moment the script will just post immediately. Also
 with new posts, any of these new posts can grow bigger than yours. This can't be avoided -- except to delay
 the posting time even more, which the script doesn't do.
 
-\* : In reality `created_utc` is in seconds, but as an example consider it as time in hours.
+[1] : In reality `created_utc` is in seconds, but as an example consider it as time in hours.
+
+[2] : This value can vary between subs. The 100 value is kinda low so it can produce many "false-postives",
+that is, posts that seem to be highly upvoted but they're not. If the sub averages 5k or lower upvotes
+for the most upvoted post in a day, the 100 value works great. Big subs that averages 20k or more, this
+value must be changed accordingly. a^b
 
 # Database 'reddit.db'
 
