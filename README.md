@@ -57,6 +57,13 @@ the last post after 5h. Basically: 3 -> 1 -> 2 -> 4.
 
 Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors from PRAW.
 
+# Dry run
+
+Pass the --dry-run to tell the script to not update anything or post anything. This option
+is for testing purposes.
+
+    ./poster.py --dry-run
+
 # More on Schedules
 
 To schedule a post you have 4 options: best, follow, anytime, +t[smhd]. "Best" is explained below.
