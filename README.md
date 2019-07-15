@@ -7,6 +7,7 @@ Python script to schedule a post in reddit. It includes a simple heuristic to sc
 
     import praw
     import sqlite3
+    from colorama import Fore, Back, Style
 
 # Praw config
 

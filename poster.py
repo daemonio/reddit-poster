@@ -7,7 +7,12 @@ import sys
 import praw
 import os
 import sqlite3
+import re
+from shutil import copyfile
 from datetime import datetime
+
+# for colored print's
+from colorama import Fore, Back, Style
 
 # TODO: Constants. Make sure to put this on
 # separeted classes/files.
@@ -81,10 +86,10 @@ class POST:
 
 # Our database. Use DB as parent class.
 class DBREDDIT(DB):
-    def __init__(self, DB_FILE):
+    def __init__(self, DB_FILE, table):
         # parent's constructor.
         DB.__init__(self, DB_FILE)
-        self.table     = DB_FILE.split('.')[0]
+        self.table     = table
         self.posts     = []
         self.debugflag = True
 
@@ -136,8 +141,37 @@ class DBREDDIT(DB):
                 self._debug('Adding ' + p.get_title() + ' to database.')
                 self.insert(p)
 
+class Print():
+    def __init__(self):
+        pass
+
+    def info(self, msg):
+        print Fore.MAGENTA + msg + Style.RESET_ALL
+
+    def alert(self, msg):
+        print Fore.RED + msg + Style.RESET_ALL
+
+    def event(self, msg):
+        print Fore.YELLOW + msg + Style.RESET_ALL
+
+    def show(self, msg):
+        print Fore.GREEN + msg + Style.RESET_ALL
+
 def to_hour(seconds):
     return round(seconds/(60 * 60))
+
+def to_seconds(n, suffix):
+    if suffix == 's':
+        return float(n)
+    if suffix == 'm':
+        return float(n)*60
+    if suffix == 'h':
+        return float(n)*60*60
+    if suffix == 'd':
+        return float(n)*60*60*24
+
+    #TODO: error
+    assert 0!=0, 'wrong suffix'
 
 def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
     sub = reddit.subreddit(subreddit)
@@ -156,7 +190,7 @@ def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
         if hour == 0:
             hour = 1
 
-        print submission.title, submission.created_utc, score, to_hour(seconds)
+        #print submission.title, submission.created_utc, score, to_hour(seconds)
 
         # submissions are already in order (the most recent first).
         # the first who matches will bring the longest timestamp.
@@ -186,39 +220,55 @@ def read_post_file(filename):
 
     return POSTS_LIST
 
-def countdown(msg, sleep):
+def countdown(MyPrint, msg, sleep):
     for i in range(sleep):
-        print '{0} {1}/{2}'.format(msg, i, sleep)
+        MyPrint.show('{0} {1}/{2}'.format(msg, i, sleep))
         time.sleep(1)
 
-def show_info(RDB):
+def show_info(MyPrint, RDB):
     q_i = RDB.select_field('id', 'status', 'queue')
     w_i = RDB.select_field('id', 'status', 'waiting')
     p_i = RDB.select_field('id', 'status', 'posted')
 
-    print '[+] Info: Queue: {0} | Waiting: {1} | Posted: {2}'.format(
-            len(q_i), len(w_i), len(p_i))
+    MyPrint.info('[+] Info: Queue: {0} | Waiting: {1} | Posted: {2}'.format(
+            len(q_i), len(w_i), len(p_i)))
+    MyPrint.info('[+] Next Auth renew: {0}'.format(datetime.fromtimestamp(time.time() + PRAW_RENEW_AUTH)))
 
     t_i = RDB.select('select subreddit,timestamp from reddit where status=? order by timestamp', ('waiting',))
 
     for s in t_i:
-        print '[+] Schedule @ {0} : {1}'.format(s[0], datetime.fromtimestamp(s[1]))
-    #r_i = t_i[0][1]
-    #if r_i != None:
-    #    print '[+] Next post is scheduled to: ', datetime.fromtimestamp(r_i), '@', t_i[0][0]
-    #else:
-    #    print '[+] NO post being scheduled right now.'
-
-    print '[+] Next Auth renew: ', datetime.fromtimestamp(time.time() + PRAW_RENEW_AUTH)
+        MyPrint.event('[+] Schedule @ {0} : {1}'.format(s[0], datetime.fromtimestamp(s[1])))
 
 #
 # MAIN
 #
 
+# Just to color stuff around.
+MyPrint = Print()
+DRY_RUN = False
+
+# --dry-run: for testing. NOTHING will be posted to reddit.
+if len(sys.argv) > 1:
+    if sys.argv[1] == '--dry-run':
+        DRY_RUN = True
+
+    MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
+
+# Database should be the name of the sqlite3 file.
+DATABASE_NAME='reddit.db'
+
+# in case of a dry run create a dumb database
+if DRY_RUN:
+    DATABASE_NAME='redditdryrun.db'
+    copyfile('reddit.db', DATABASE_NAME)
+    MyPrint.alert('[+] Using Dry run database: ' + DATABASE_NAME)
+
 # data base file should be created beforehand.
-RDB = DBREDDIT('reddit.db')
+# Second parameter is the table name.
+RDB = DBREDDIT(DATABASE_NAME, 'reddit')
+
 # Your bot description in ~/.config/praw.ini
-BOT_NAME='alface'
+BOT_NAME='mybot'
 
 # Praw obj. Will be initialized in the main loop.
 reddit = None
@@ -229,14 +279,6 @@ POSTS_LIST = []
 
 # inc every time.
 praw_renew_time = 0
-
-DRY_RUN = False
-
-# --dry-run: for testing. NOTHING will be posted to reddit,
-# but the database will be compromised. Use ./reset_database.sh.
-if len(sys.argv) > 1:
-    if sys.argv[1] == '--dry-run':
-        DRY_RUN = True
 
 # Decrease time for test purposes.
 if DRY_RUN:
@@ -249,7 +291,7 @@ while True:
 
     if praw_renew_time == 0:
         reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
-        print '[+] PRAW: connect as: ', reddit.user.me()
+        MyPrint.event('[+] PRAW: connect as: ' + str(reddit.user.me()))
 
     if OLDMTIME != os.path.getmtime(POST_FILE):
         POSTS_LIST = read_post_file(POST_FILE)
@@ -257,7 +299,7 @@ while True:
 
         RDB.update(POSTS_LIST)
 
-    show_info(RDB)
+    show_info(MyPrint, RDB)
 
     # All posts that weren't posted yet (status not equal to posted)
     available_posts = RDB.select_field('*', 'status', 'posted', notEqual=True)
@@ -280,7 +322,6 @@ while True:
                 new_timestamp = actual_timestamp
 
                 if schedule == 'best':
-                    print 'Updating timestamp'
                     if DRY_RUN:
                         # set any timestamp on dry run.
                         new_timestamp = time.time() + 60*2
@@ -295,17 +336,22 @@ while True:
 
                     if t_timestamp != None and (actual_timestamp - t_timestamp) < TIME_POST_SAME_SUB:
                         new_timestamp += TIME_POST_SAME_SUB
-                        print '[+] Skipping until: ', TIME_POST_SAME_SUB
+                        MyPrint.alert('[+] Skipping until: ' + TIME_POST_SAME_SUB)
                         RDB.update_field(key, 'status', 'skip')
                 elif schedule == 'follow':
                     # TODO: follow as first post should act like anytime
                     RDB.update_field(key, 'status', 'ignored')
+                elif schedule[0] == '+':
+                    regexres = re.search('^\+([0-9]+)([smh])$', schedule)
+                    time_seconds = to_seconds(regexres.group(1), regexres.group(2))
+
+                    new_timestamp = actual_timestamp + time_seconds
 
                 RDB.update_field(key, 'timestamp', new_timestamp)
             else:
-                print 'No update. A post for r/'+subreddit+' is already scheduled.'
+                MyPrint.alert('No update. A post for r/'+subreddit+' is already scheduled.')
         elif status == 'waiting' and actual_timestamp > timestamp:
-            print 'Posted.'
+            MyPrint.alert('[+] Posted in {0} : {1}'.format(subreddit, title))
             if DRY_RUN == False:
                 reddit_submit(reddit, subreddit, title, url)
                 pass
@@ -324,11 +370,11 @@ while True:
                     RDB.update_field(key+1, 'status', 'waiting')
                     RDB.update_field(key+1, 'timestamp', timestamp)
 
-            countdown('Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
+            countdown(MyPrint, 'Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
         elif status == 'skip' and actual_timestamp > timestamp:
             # Time to wake up and be back to queue.
             RDB.update_field(key, 'status', 'queue')
 
-    countdown('Loop waiting...', SLEEP_LOOP)
+    countdown(MyPrint, 'Loop waiting...', SLEEP_LOOP)
     praw_renew_time += SLEEP_LOOP
     RDB.show()
