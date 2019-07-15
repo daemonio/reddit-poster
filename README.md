@@ -42,15 +42,25 @@ Example of `postfile.txt`:
     dankmemes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~best
     pics~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~follow
     dank_memes~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~anytime
+    funny~The real firework~https://i.redd.it/k9bzcs5gou931.jpg~+5h
 
 First post is "best" so it will be posted when it's the best time to do so (see below).
 Second post will be delayed to be posted after the first one. This is what "follow" means.
 The third post will be posted when the main loop hits it, that is, as soon as possible.
+Finally the last post will be submitted after 5 hours from current time.
 
 Let's say the first post will be schedule 4 hours from here. The posting sequence will
 be: third post immediately, first post after 4 hours, second post after 4h and 2 minutes.
 
 Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors from PRAW.
+
+# Type of Schedules
+
+To schedule a post you have 5 options: best, follow, anytime, +t. "Best" is explained below.
+"Follow" submita a post after the post above it. "Anytime" is the same as "immediately"
+
+"+t" is the tradicional time schedule. If you put +1h the post will be submitted after
+one hour from current time. Suffixes are 's', 'h', 'd' for seconds, hours and days repectively.
 
 # How "best" schedule work
 
