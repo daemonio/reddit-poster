@@ -37,7 +37,7 @@ symbol "\~" is the field separator and "schedule" can be:
     best     : heuristic to decide the best time to post.
     anytime  : post as soon as possible
     follow   : post after some post -- the one above it in the `postfile.txt`.
-    +t[smhd] : tradicional scheduling. Post after "t" time have passed.
+    +t[smhd] : traditional scheduling. Post after "t" time have passed.
 
 Example of `postfile.txt`:
 
@@ -62,7 +62,7 @@ Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors 
 To schedule a post you have 4 options: best, follow, anytime, +t[smhd]. "Best" is explained below.
 "Follow" submit a post after the post above it. "Anytime" is the same as immediately.
 
-"+t[smhd]" is the tradicional time scheduling. If you put +1h the post will be submitted after
+"+t[smhd]" is the traditional time scheduling. If you put +1h the post will be submitted after
 one hour from current time. Suffixes are 's', 'm', 'h', 'd' for seconds, minutes, hours and
 days, repectively.
 
