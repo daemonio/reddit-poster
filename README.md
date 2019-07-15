@@ -52,7 +52,8 @@ The third post will be posted when the main loop hits it, that is, as soon as po
 Finally the last post will be submitted after 5 hours from current time.
 
 Let's say the first post will be schedule 4 hours from here. The posting sequence will
-be: third post immediately, first post after 4 hours, second post after 4h and 2 minutes.
+be: third post immediately, first post after 4 hours, second post after 4h and 2 minutes and
+the last post after 5h. Basically: 3 -> 1 -> 2 -> 4.
 
 Obs: There's a delay of 2 minutes between posts. This is to avoid "spam" errors from PRAW.
 
