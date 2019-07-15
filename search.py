@@ -41,7 +41,7 @@ except:
     print '[use] ' + sys.argv[0] + ' <sub name> <search term>'
     sys.exit(0)
 
-BOT_NAME = 'alface'
+BOT_NAME = 'mybot'
 reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
 print '[+] PRAW: connect as: ', reddit.user.me()
 

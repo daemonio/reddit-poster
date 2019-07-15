@@ -343,7 +343,7 @@ while True:
                     # TODO: follow as first post should act like anytime
                     RDB.update_field(key, 'status', 'ignored')
                 elif schedule[0] == '+':
-                    regexres = re.search('^\+([0-9]+)([smh])$', schedule)
+                    regexres = re.search('^\+([0-9]+)([smhd])$', schedule)
                     time_seconds = to_seconds(regexres.group(1), regexres.group(2))
 
                     new_timestamp = actual_timestamp + time_seconds
