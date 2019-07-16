@@ -422,5 +422,5 @@ while True:
 
     if FLAG_LOOP_WAIT:
         countdown(MyPrint, 'Loop waiting...', SLEEP_LOOP)
-    praw_renew_time += SLEEP_LOOP
+        praw_renew_time += SLEEP_LOOP
     RDB.show()
