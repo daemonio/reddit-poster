@@ -365,7 +365,7 @@ while True:
         elif status == 'waiting' and actual_timestamp > timestamp:
             MyPrint.alert('[+] Posted in {0} : "{1}"'.format(subreddit, title))
             if DRY_RUN == False:
-                #reddit_submit(reddit, subreddit, title, url)
+                reddit_submit(reddit, subreddit, title, url)
                 pass
 
             RDB.update_field(key, 'status', 'posted')
