@@ -20,7 +20,7 @@ SLEEP_BETWEEN_POSTS = 120 # 2 min
 SLEEP_LOOP          = 300 # 5 min
 POST_FILE           = 'postfile.txt'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
-TIME_POST_SAME_SUB  = 300 
+TIME_POST_SAME_SUB  = 7200 # used when two or more "best" posts.
 DRY_RUN_BEST_TIME   = 120  # only when using --dry-run
 
 class DB:
@@ -149,11 +149,14 @@ class Print():
     def info(self, msg):
         print Fore.MAGENTA + msg + Style.RESET_ALL
 
+    def warn(self, msg):
+        print Fore.MAGENTA, Back.WHITE + msg + Style.RESET_ALL
+
     def alert(self, msg):
-        print Fore.RED + msg + Style.RESET_ALL
+        print Fore.WHITE, Back.RED + msg + Style.RESET_ALL
 
     def event(self, msg):
-        print Fore.YELLOW + msg + Style.RESET_ALL
+        print Fore.YELLOW, Back.WHITE + msg + Style.RESET_ALL
 
     def show(self, msg):
         print Fore.GREEN + msg + Style.RESET_ALL
@@ -235,10 +238,11 @@ def show_info(MyPrint, RDB):
             len(q_i), len(w_i), len(p_i)))
     MyPrint.info('[+] Next Auth renew: {0}'.format(datetime.fromtimestamp(time.time() + PRAW_RENEW_AUTH)))
 
-    t_i = RDB.select('select subreddit,timestamp from reddit where status=? order by timestamp', ('waiting',))
+    t_i = RDB.select('select subreddit,title,timestamp from reddit where status=? order by timestamp', ('waiting',))
 
     for s in t_i:
-        MyPrint.event('[+] Schedule @ {0} : {1}'.format(s[0], datetime.fromtimestamp(s[1])))
+        MyPrint.warn('[+] NEXT post to {0} "{1}" @ {2}'.format(
+            s[0], s[1], datetime.fromtimestamp(s[2])))
 
 #
 # MAIN
@@ -302,6 +306,8 @@ while True:
 
     show_info(MyPrint, RDB)
 
+    FLAG_LOOP_WAIT = True
+
     # All posts that weren't posted yet (status not equal to posted)
     available_posts = RDB.select_field('*', 'status', 'posted', notEqual=True)
     for t in available_posts:
@@ -310,61 +316,65 @@ while True:
         actual_timestamp = time.time()
 
         if status == 'queue':
-            # Don't de-queue if there are 'waiting' posts
-            # of the same subreddit. The first post should
-            # be made in order to post the second, and go on.
-            is_to_update = True
-            for u in RDB.select_field('status,schedule', 'subreddit', subreddit):
-                if u[0] == 'waiting':
-                    is_to_update = False
-                    break
-            if is_to_update:
-                RDB.update_field(key, 'status', 'waiting')
-                new_timestamp = actual_timestamp
+            # This value can be modified in the if/elif chain and will
+            # be updated after.
+            new_timestamp = actual_timestamp
 
-                if schedule == 'best':
-                    if DRY_RUN:
-                        # set any timestamp on dry run.
-                        new_timestamp = time.time() + DRY_RUN_BEST_TIME
-                    else:
-                        new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
+            # "best" schedule
+            if schedule == 'best':
+                if DRY_RUN:
+                    new_timestamp = time.time() + DRY_RUN_BEST_TIME
+                else:
+                    new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
 
-                    # If we're posting in the subreddit we have to "wait" at least 2h when using
-                    # "best" since the previous best can be rising and gaining upvotes.
-                    query = 'select MAX(timestamp) from reddit where subreddit=? and status=?'
-                    r_query = RDB.select(query, (subreddit, 'posted'))
-                    t_timestamp = r_query[0][0] # None or the last timestamp of this particular subreddit.
-
-                    if t_timestamp != None and (actual_timestamp - t_timestamp) < TIME_POST_SAME_SUB:
-                        new_timestamp += TIME_POST_SAME_SUB
-                        MyPrint.alert('[+] Skipping until: ' + str(TIME_POST_SAME_SUB))
-                        RDB.update_field(key, 'status', 'skip')
-                elif schedule == 'follow':
-                    # TODO: follow as first post should act like anytime
+                # A "best" post must be at least 2h older than the most recent post for
+                # that sub.
+                query = 'select MAX(timestamp) from reddit where subreddit=? and status!=?'
+                query_r = RDB.select(query, (subreddit, 'queue'))
+                t_timestamp = query_r[0][0]
+                
+                if t_timestamp != None and (actual_timestamp - t_timestamp) < TIME_POST_SAME_SUB:
+                    new_timestamp += TIME_POST_SAME_SUB
+                    MyPrint.event('[+] Delaying schedule post {0} for {1}.'.format(title, subreddit))
+                    RDB.update_field(key, 'status', 'skip')
+                else:
+                    RDB.update_field(key, 'status', 'waiting')
+            # "follow" schedule
+            elif schedule == 'follow':
+                # "follow" as first post should act like anytime.
+                if key == 0:
+                    RDB.update_field(key, 'status', 'anytime')
+                else:
                     RDB.update_field(key, 'status', 'ignored')
-                elif schedule[0] == '+':
-                    regexres = re.search('^\+([0-9]+)([smhd])$', schedule)
-                    time_seconds = to_seconds(regexres.group(1), regexres.group(2))
+            # "+t[smhd]" schedule
+            elif schedule[0] == '+':
+                regexres = re.search('^\+([0-9]+)([smhd])$', schedule)
+                time_seconds = to_seconds(regexres.group(1), regexres.group(2))
 
-                    new_timestamp = actual_timestamp + time_seconds
+                #new_timestamp = actual_timestamp + time_seconds
+                new_timestamp += time_seconds
 
-                RDB.update_field(key, 'timestamp', new_timestamp)
-            else:
-                MyPrint.alert('No update. A post for r/'+subreddit+' is already scheduled.')
+                RDB.update_field(key, 'status', 'waiting')
+            # "anytime" schedule
+            elif schedule == "anytime":
+                RDB.update_field(key, 'status', 'waiting')
+                #MyPrint.alert('[+] No update. A post for r/'+subreddit+' is already scheduled.')
+
+            # Update timestamp for a queue post.
+            RDB.update_field(key, 'timestamp', new_timestamp)
         elif status == 'waiting' and actual_timestamp > timestamp:
-            MyPrint.alert('[+] Posted in {0} : {1}'.format(subreddit, title))
+            MyPrint.alert('[+] Posted in {0} : "{1}"'.format(subreddit, title))
             if DRY_RUN == False:
-                reddit_submit(reddit, subreddit, title, url)
+                #reddit_submit(reddit, subreddit, title, url)
                 pass
 
             RDB.update_field(key, 'status', 'posted')
 
-            query_follow = 'select status,schedule from reddit where id=?'
-
-            # Loop to treat multiple "follows".
+            # Wake up "follow" posts
+            query = 'select status,schedule from reddit where id=?'
             key_next = key + 1
             while True:
-                t_follow = RDB.select(query_follow, (key_next,))
+                t_follow = RDB.select(query, (key_next,))
 
                 if len(t_follow) > 0:
                     t_status, t_schedule = t_follow[0]
@@ -374,6 +384,9 @@ while True:
                         # timestamp less than the above post.
                         RDB.update_field(key_next, 'status', 'waiting')
                         RDB.update_field(key_next, 'timestamp', timestamp)
+
+                        # Don't need to "wait" the main loop.
+                        FLAG_LOOP_WAIT = False
                     else:
                         break
                 else:
@@ -381,11 +394,13 @@ while True:
 
                 key_next += 1
 
-            countdown(MyPrint, 'Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
+            countdown(MyPrint, '[+] Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
         elif status == 'skip' and actual_timestamp > timestamp:
             # Time to wake up and be back to queue.
+            MyPrint.event('[+] Skip post status changed to queue. {0} in {1}'.format(title, subreddit))
             RDB.update_field(key, 'status', 'queue')
 
-    countdown(MyPrint, 'Loop waiting...', SLEEP_LOOP)
+    if FLAG_LOOP_WAIT:
+        countdown(MyPrint, 'Loop waiting...', SLEEP_LOOP)
     praw_renew_time += SLEEP_LOOP
     RDB.show()
