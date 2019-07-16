@@ -250,14 +250,19 @@ def show_info(MyPrint, RDB):
 
 # Just to color stuff around.
 MyPrint = Print()
+
+# Options
 DRY_RUN = False
+COMMAND_AFTER = None
 
 # --dry-run: for testing. NOTHING will be posted to reddit.
 if len(sys.argv) > 1:
     if sys.argv[1] == '--dry-run':
         DRY_RUN = True
-
-    MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
+        MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
+    elif sys.argv[1] == '--command-after':
+        COMMAND_AFTER = sys.argv[2]
+        MyPrint.alert('[+] Executing {0} after everything is posted.'.format(sys.argv[2]))
 
 # Database should be the name of the sqlite3 file.
 DATABASE_NAME='reddit.db'
@@ -310,6 +315,13 @@ while True:
 
     # All posts that weren't posted yet (status not equal to posted)
     available_posts = RDB.select_field('*', 'status', 'posted', notEqual=True)
+    
+    # Execute the --command-after when everypost is "posted"
+    if COMMAND_AFTER != None and len(available_posts) == 0:
+        os.system(COMMAND_AFTER)
+        # Execute only once.
+        COMMAND_AFTER = None
+
     for t in available_posts:
         (key, status, schedule, subreddit, title, url, timestamp) = t
 
@@ -367,7 +379,6 @@ while True:
             MyPrint.alert('[+] Posted in {0} : "{1}"'.format(subreddit, title))
             if DRY_RUN == False:
                 reddit_submit(reddit, subreddit, title, url)
-                pass
 
             RDB.update_field(key, 'status', 'posted')
 
