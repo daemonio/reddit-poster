@@ -110,6 +110,11 @@ that is, posts that seem to be highly upvoted but they're not. If the sub averag
 for the most upvoted post in a day, the 100 value works great. Big subs that averages 20k or more, this
 value must be changed accordingly.
 
+# Options
+
+    --dry-run                 : execute script as a test. No post will be submitted to reddit.
+    --command-after <command> : command to execute (only once) when everything is submitted.
+                                Useful for "reboots".
 # Database 'reddit.db'
 
 The DB is a file under sqlite3 format. Its schema is simple, just type:
