@@ -238,11 +238,19 @@ def show_info(MyPrint, RDB):
             len(q_i), len(w_i), len(p_i)))
     MyPrint.info('[+] Next Auth renew: {0}'.format(datetime.fromtimestamp(time.time() + PRAW_RENEW_AUTH)))
 
-    t_i = RDB.select('select subreddit,title,timestamp from reddit where status=? order by timestamp', ('waiting',))
+    # SKIP info
+    t_i = RDB.select('select subreddit,title,timestamp from reddit where status=? order by timestamp', ('skip',))
+    for s in t_i:
+        MyPrint.warn('[+] SKIP to WAITING {0} "{1}" in {2}'.format(
+            s[0], s[1], datetime.fromtimestamp(s[2])))
 
+    # NEXT post
+    t_i = RDB.select('select subreddit,title,timestamp from reddit where status=? order by timestamp', ('waiting',))
     for s in t_i:
         MyPrint.warn('[+] NEXT post to {0} "{1}" @ {2}'.format(
             s[0], s[1], datetime.fromtimestamp(s[2])))
+
+
 
 #
 # MAIN
@@ -409,7 +417,7 @@ while True:
             countdown(MyPrint, '[+] Sleep time between posting. Waiting...', SLEEP_BETWEEN_POSTS)
         elif status == 'skip' and actual_timestamp > timestamp:
             # Time to wake up and be back to queue.
-            MyPrint.event('[+] Skip post status changed to queue. {0} in {1}'.format(title, subreddit))
+            MyPrint.event('[+] SKIP post status changed to QUEUE. {0} in {1}'.format(title, subreddit))
             RDB.update_field(key, 'status', 'queue')
 
     if FLAG_LOOP_WAIT:
