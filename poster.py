@@ -342,7 +342,8 @@ while True:
             # "follow" schedule
             elif schedule == 'follow':
                 # "follow" as first post should act like anytime.
-                if key == 0:
+                if key == 1:
+                    MyPrint.event('[+] "Follow" post changed to "anytime": "{0}"'.format(title))
                     RDB.update_field(key, 'status', 'anytime')
                 else:
                     RDB.update_field(key, 'status', 'ignored')
