@@ -15,13 +15,13 @@ from datetime import datetime
 from colorama import Fore, Back, Style
 
 # TODO: Constants. Make sure to put this on
-# separeted classes/files.
+# classes or files.
 SLEEP_BETWEEN_POSTS = 120 # 2 min
 SLEEP_LOOP          = 300 # 5 min
 POST_FILE           = 'postfile.txt'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
 TIME_POST_SAME_SUB  = 7200 # used when two or more "best" posts.
-DRY_RUN_BEST_TIME   = 120  # only when using --dry-run
+DRY_RUN_BEST_TIME   = 120  # used when using --dry-run
 
 class DB:
     def __init__(self, DB_FILE):
