@@ -23,6 +23,7 @@ POST_FILE           = 'postfile.txt'
 PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
 TIME_POST_SAME_SUB  = 7200 # used when two or more "best" posts.
 DRY_RUN_BEST_TIME   = 120  # used when using --dry-run
+BOT_NAME            = 'mybot' # modify this
 
 class DB:
     def __init__(self, DB_FILE):
@@ -178,6 +179,56 @@ def to_seconds(n, suffix):
     #TODO: error
     assert 0!=0, 'wrong suffix'
 
+def to_date_ago(seconds):
+    if seconds < 60:
+        return (seconds, 'seconds')
+    
+    minutes = round(seconds/60)
+    if minutes < 60:
+        return (minutes, 'minutes')
+    
+    hour = round(minutes/60)
+    if hour < 24:
+        return (hour, 'hours')
+    
+    day = round(hour/24)
+    if day < 30:
+        return (day, 'days')
+    
+    month = round(day/30)
+    if month < 12:
+        return (month, 'months')
+
+    year = round(month/12)
+    
+    return (year, 'years')
+
+def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=30):
+    sub = reddit.subreddit(subreddit)
+    current_timestamp = time.time()
+
+    SUB_LIST = []
+    SUBMISSION_LIST = []
+
+    if new_or_search == True:
+        SUBMISSION_LIST = sub.new(limit=limit_new)
+        pass
+    else:
+        SUBMISSION_LIST = sub.search(search, limit=limit_new)
+
+    #for submission in sub.new(limit=limit_new):
+    for submission in SUBMISSION_LIST:
+        t = current_timestamp - submission.created_utc
+        (d1, d2) = to_date_ago(t)
+
+        title  = submission.title.encode('utf-8')
+        score  = submission.score
+        author = submission.author
+        url    = submission.url
+
+        print 'Title: {0}\nUrl: {1}\nScore: {2}\nAuthor: {3}\nPosted: {4} {5} ago\n\n'.format(
+                title, url, score, author, d1, d2)
+
 def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
     sub = reddit.subreddit(subreddit)
     current_timestamp = time.time()
@@ -251,7 +302,11 @@ def show_info(MyPrint, RDB):
         MyPrint.warn('[+] NEXT post to {0} "{1}" @ {2}'.format(
             s[0], s[1], datetime.fromtimestamp(s[2])))
 
+def praw_login(BOT_NAME):
+    reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
+    MyPrint.event('[+] PRAW: connect as: ' + str(reddit.user.me()))
 
+    return reddit
 
 #
 # MAIN
@@ -260,33 +315,65 @@ def show_info(MyPrint, RDB):
 # Dealing with options
 parser = optparse.OptionParser()
 parser.add_option('--dry-run', action="store_true", default=False)
-parser.add_option('--get-best', action="store", dest="subreddit")
+parser.add_option('--get-best', action="store_true", default=False)
+parser.add_option('--get-new', action="store", dest='new')
+parser.add_option('--search', action="store", dest='search')
+parser.add_option('--subreddit', action="store", dest="subreddit")
 parser.add_option('--command-after', action="store", dest="command")
 
 (options, values) = parser.parse_args()
 
-DRY_RUN=options.dry_run
-COMMAND_AFTER=options.command
-GET_BEST_SUBREDDIT=options.subreddit
+OPT_DRY_RUN=options.dry_run
+OPT_CMD_AFTER=options.command
+OPT_SUBREDDIT=options.subreddit
+OPT_BEST=options.get_best
+OPT_SEARCH=options.search
+OPT_NEW=options.new
+
+# Validating parameters.
+if (OPT_SUBREDDIT == None) and (OPT_BEST or OPT_NEW != None or OPT_SEARCH != None):
+    print '[+] Error: When using --get-best or --get-new or --search, '
+    print '--subreddit must be used.'
+    pass
 
 # Just to color stuff around.
 MyPrint = Print()
 
-# Options
-#DRY_RUN = False
-#COMMAND_AFTER = None
-
 # --dry-run: for testing. NOTHING will be posted to reddit.
-if DRY_RUN:
+if OPT_DRY_RUN:
         MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
-if COMMAND_AFTER != None:
-        MyPrint.alert('[+] Executing {0} after everything is posted.'.format(COMMAND_AFTER))
+
+# Treating options.
+# --get-best
+if OPT_BEST:
+    reddit = praw_login(BOT_NAME)
+
+    new_timestamp = reddit_calc_timestamp_best(
+            reddit, OPT_SUBREDDIT, limit_new=30)
+
+    MyPrint.warn('[+] BEST time to post in {0} : {1}'.format(
+        OPT_SUBREDDIT, datetime.fromtimestamp(new_timestamp)))
+
+    sys.exit()
+
+# --get-new and --get-search
+if OPT_NEW != None or OPT_SEARCH != None:
+    reddit = praw_login(BOT_NAME)
+
+    new_or_search = (OPT_NEW != None)
+
+    MyPrint.warn('[+] Getting {0} new posts of : {1}'.format(
+        OPT_NEW, OPT_SUBREDDIT))
+
+    reddit_get_posts(reddit, new_or_search, OPT_SUBREDDIT, OPT_SEARCH, limit_new=OPT_NEW)
+
+    sys.exit()
 
 # Database should be the name of the sqlite3 file.
 DATABASE_NAME='reddit.db'
 
 # in case of a dry run create a dumb database
-if DRY_RUN:
+if OPT_DRY_RUN:
     DATABASE_NAME='redditdryrun.db'
     copyfile('reddit.db', DATABASE_NAME)
     MyPrint.alert('[+] Using Dry run database: ' + DATABASE_NAME)
@@ -309,7 +396,7 @@ POSTS_LIST = []
 praw_renew_time = 0
 
 # Decrease time for test purposes.
-if DRY_RUN:
+if OPT_DRY_RUN:
     SLEEP_BETWEEN_POSTS = 10
     SLEEP_LOOP          = 10
     TIME_POST_SAME_SUB  = 120 
@@ -318,17 +405,7 @@ while True:
     praw_renew_time = praw_renew_time % PRAW_RENEW_AUTH
 
     if praw_renew_time == 0:
-        reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
-        MyPrint.event('[+] PRAW: connect as: ' + str(reddit.user.me()))
-
-    # --get-best=subreddit Get the "best" time to post and get out.
-    if GET_BEST_SUBREDDIT != None:
-        new_timestamp = reddit_calc_timestamp_best(
-                reddit, GET_BEST_SUBREDDIT, limit_new=30)
-        MyPrint.warn('[+] BEST time to post in {0} : {1}'.format(
-            GET_BEST_SUBREDDIT, datetime.fromtimestamp(new_timestamp)))
-
-        break
+        reddit = praw_login(BOT_NAME)
 
     if OLDMTIME != os.path.getmtime(POST_FILE):
         POSTS_LIST = read_post_file(POST_FILE)
@@ -344,10 +421,10 @@ while True:
     available_posts = RDB.select_field('*', 'status', 'posted', notEqual=True)
     
     # Execute the --command-after when everypost is "posted"
-    if COMMAND_AFTER != None and len(available_posts) == 0:
-        os.system(COMMAND_AFTER)
+    if OPT_CMD_AFTER != None and len(available_posts) == 0:
+        os.system(OPT_CMD_AFTER)
         # Execute only once.
-        COMMAND_AFTER = None
+        OPT_CMD_AFTER = None
 
     for t in available_posts:
         (key, status, schedule, subreddit, title, url, timestamp) = t
@@ -361,7 +438,7 @@ while True:
 
             # "best" schedule
             if schedule == 'best':
-                if DRY_RUN:
+                if OPT_DRY_RUN:
                     new_timestamp = time.time() + DRY_RUN_BEST_TIME
                 else:
                     new_timestamp = reddit_calc_timestamp_best(reddit, subreddit, limit_new=30)
@@ -404,8 +481,8 @@ while True:
             RDB.update_field(key, 'timestamp', new_timestamp)
         elif status == 'waiting' and actual_timestamp > timestamp:
             MyPrint.alert('[+] Posted in {0} : "{1}"'.format(subreddit, title))
-            if DRY_RUN == False:
-                #reddit_submit(reddit, subreddit, title, url)
+            if OPT_DRY_RUN == False:
+                reddit_submit(reddit, subreddit, title, url)
                 pass
 
             RDB.update_field(key, 'status', 'posted')
