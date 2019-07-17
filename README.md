@@ -114,7 +114,8 @@ value must be changed accordingly.
 
     --dry-run                 : execute script as a test. No post will be submitted to reddit.
     --command-after <command> : command to execute (only once) when everything is submitted.
-                                Useful for "reboots".
+                                Useful for "reboot".
+    --get-best <subreddit>    : print the "best" time to post in `subreddit`.
 # Database 'reddit.db'
 
 The DB is a file under sqlite3 format. Its schema is simple, just type:
