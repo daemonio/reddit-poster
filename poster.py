@@ -8,6 +8,7 @@ import praw
 import os
 import sqlite3
 import re
+import optparse
 from shutil import copyfile
 from datetime import datetime
 
@@ -256,21 +257,30 @@ def show_info(MyPrint, RDB):
 # MAIN
 #
 
+# Dealing with options
+parser = optparse.OptionParser()
+parser.add_option('--dry-run', action="store_true", default=False)
+parser.add_option('--get-best', action="store", dest="subreddit")
+parser.add_option('--command-after', action="store", dest="command")
+
+(options, values) = parser.parse_args()
+
+DRY_RUN=options.dry_run
+COMMAND_AFTER=options.command
+GET_BEST_SUBREDDIT=options.subreddit
+
 # Just to color stuff around.
 MyPrint = Print()
 
 # Options
-DRY_RUN = False
-COMMAND_AFTER = None
+#DRY_RUN = False
+#COMMAND_AFTER = None
 
 # --dry-run: for testing. NOTHING will be posted to reddit.
-if len(sys.argv) > 1:
-    if sys.argv[1] == '--dry-run':
-        DRY_RUN = True
+if DRY_RUN:
         MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
-    elif sys.argv[1] == '--command-after':
-        COMMAND_AFTER = sys.argv[2]
-        MyPrint.alert('[+] Executing {0} after everything is posted.'.format(sys.argv[2]))
+if COMMAND_AFTER != None:
+        MyPrint.alert('[+] Executing {0} after everything is posted.'.format(COMMAND_AFTER))
 
 # Database should be the name of the sqlite3 file.
 DATABASE_NAME='reddit.db'
@@ -310,6 +320,15 @@ while True:
     if praw_renew_time == 0:
         reddit = praw.Reddit(BOT_NAME, user_agent='reddit-poster script')
         MyPrint.event('[+] PRAW: connect as: ' + str(reddit.user.me()))
+
+    # --get-best=subreddit Get the "best" time to post and get out.
+    if GET_BEST_SUBREDDIT != None:
+        new_timestamp = reddit_calc_timestamp_best(
+                reddit, GET_BEST_SUBREDDIT, limit_new=30)
+        MyPrint.warn('[+] BEST time to post in {0} : {1}'.format(
+            GET_BEST_SUBREDDIT, datetime.fromtimestamp(new_timestamp)))
+
+        break
 
     if OLDMTIME != os.path.getmtime(POST_FILE):
         POSTS_LIST = read_post_file(POST_FILE)
@@ -386,7 +405,8 @@ while True:
         elif status == 'waiting' and actual_timestamp > timestamp:
             MyPrint.alert('[+] Posted in {0} : "{1}"'.format(subreddit, title))
             if DRY_RUN == False:
-                reddit_submit(reddit, subreddit, title, url)
+                #reddit_submit(reddit, subreddit, title, url)
+                pass
 
             RDB.update_field(key, 'status', 'posted')
 
