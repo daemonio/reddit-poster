@@ -314,12 +314,18 @@ def praw_login(BOT_NAME):
 
 # Dealing with options
 parser = optparse.OptionParser()
-parser.add_option('--dry-run', action="store_true", default=False)
-parser.add_option('--get-best', action="store_true", default=False)
-parser.add_option('--get-new', action="store", dest='new')
-parser.add_option('--search', action="store", dest='search')
-parser.add_option('--subreddit', action="store", dest="subreddit")
-parser.add_option('--command-after', action="store", dest="command")
+parser.add_option('--dry-run', action="store_true", default=False,
+        help='Execute script as a test. No post will be submitted to reddit.')
+parser.add_option('--command-after', action="store", dest="command",
+        help='Command to execute (only once) when everything is submitted.')
+parser.add_option('--subreddit', action="store", dest="subreddit",
+        help='Set the subreddit that the options will operate.')
+parser.add_option('--get-best', action="store_true", default=False,
+        help='Print the "best" time to post in --subreddit.')
+parser.add_option('--get-new', action="store", dest='new',
+        help='Get the first N new posts of the --subreddit.')
+parser.add_option('--search', action="store", dest='search',
+        help='Terms to search in --subreddit.')
 
 (options, values) = parser.parse_args()
 
