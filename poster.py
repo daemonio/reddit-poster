@@ -334,7 +334,8 @@ OPT_NEW=options.new
 if (OPT_SUBREDDIT == None) and (OPT_BEST or OPT_NEW != None or OPT_SEARCH != None):
     print '[+] Error: When using --get-best or --get-new or --search, '
     print '--subreddit must be used.'
-    pass
+
+    sys.exit()
 
 # Just to color stuff around.
 MyPrint = Print()
