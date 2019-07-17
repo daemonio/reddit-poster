@@ -113,9 +113,16 @@ value must be changed accordingly.
 # Options
 
     --dry-run                 : execute script as a test. No post will be submitted to reddit.
-    --command-after <command> : command to execute (only once) when everything is submitted.
+    --command-after=COMMAND   : command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
-    --get-best <subreddit>    : print the "best" time to post in `subreddit`.
+    --subredit=SUBREDDIT      : Set the subreddit that the options will operate.
+    --get-best                : print the "best" time to post in --subreddit.
+    --get-new  N              : get the first N new posts of the --subreddit.
+    --get-search=SEARCH       : term to search in --subreddit.
+
+Example:
+
+    ./poster.py --subreddit natureismetal --search 'honey+badger+snake'
 # Database 'reddit.db'
 
 The DB is a file under sqlite3 format. Its schema is simple, just type:
