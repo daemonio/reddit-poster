@@ -112,13 +112,14 @@ value must be changed accordingly.
 
 # Options
 
-    --dry-run                 : execute script as a test. No post will be submitted to reddit.
-    --command-after=COMMAND   : command to execute (only once) when everything is submitted.
+    --dry-run                 : Execute script as a test. No post will be submitted to reddit.
+    --quit-run                : Quit script when everything is submitted.
+    --command-after=COMMAND   : Command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
     --subredit=SUBREDDIT      : Set the subreddit that the options will operate.
-    --get-best                : print the "best" time to post in --subreddit.
-    --get-new  N              : get the first N new posts of the --subreddit.
-    --get-search=SEARCH       : term to search in --subreddit.
+    --get-best                : Print the "best" time to post in --subreddit.
+    --get-new  N              : Get the first N new posts of the --subreddit.
+    --get-search=SEARCH       : Term to search in --subreddit.
 
 Example:
 
