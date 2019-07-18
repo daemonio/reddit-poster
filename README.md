@@ -119,7 +119,7 @@ value must be changed accordingly.
     --subredit=SUBREDDIT      : Set the subreddit that the options will operate.
     --get-best                : Print the "best" time to post in --subreddit.
     --get-new  N              : Get the first N new posts of the --subreddit.
-    --get-search=SEARCH       : Term to search in --subreddit.
+    --search=SEARCH           : Term to search in --subreddit.
 
 Example:
 
