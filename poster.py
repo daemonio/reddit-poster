@@ -316,6 +316,8 @@ def praw_login(BOT_NAME):
 parser = optparse.OptionParser()
 parser.add_option('--dry-run', action="store_true", default=False,
         help='Execute script as a test. No post will be submitted to reddit.')
+parser.add_option('--quit-after', action="store_true", default=False,
+        help='Quit the script when everything is submitted.')
 parser.add_option('--command-after', action="store", dest="command",
         help='Command to execute (only once) when everything is submitted.')
 parser.add_option('--subreddit', action="store", dest="subreddit",
@@ -330,6 +332,7 @@ parser.add_option('--search', action="store", dest='search',
 (options, values) = parser.parse_args()
 
 OPT_DRY_RUN=options.dry_run
+OPT_QUIT=options.quit_after
 OPT_CMD_AFTER=options.command
 OPT_SUBREDDIT=options.subreddit
 OPT_BEST=options.get_best
@@ -432,6 +435,10 @@ while True:
         os.system(OPT_CMD_AFTER)
         # Execute only once.
         OPT_CMD_AFTER = None
+
+    if OPT_QUIT and len(available_posts) == 0:
+        MyPrint.alert('[+] Quitting...')
+        sys.exit(0)
 
     for t in available_posts:
         (key, status, schedule, subreddit, title, url, timestamp) = t
