@@ -116,7 +116,7 @@ value must be changed accordingly.
     --quit-run                : Quit script when everything is submitted.
     --command-after=COMMAND   : Command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
-    --subredit=SUBREDDIT      : Set the subreddit that the options will operate.
+    --subreddit=SUBREDDIT     : Set the subreddit that the options will operate.
     --get-best                : Print the "best" time to post in --subreddit.
     --get-new  N              : Get the first N new posts of the --subreddit.
     --search=SEARCH           : Term to search in --subreddit.
