@@ -114,7 +114,7 @@ value must be changed accordingly.
  
     -h, --help                : Show this help message and exit.
     --dry-run                 : Execute script as a test. No post will be submitted to reddit.
-    --quit-run                : Quit script when everything is submitted.
+    --quit-after              : Quit script when everything is submitted.
     --command-after=COMMAND   : Command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
     --subreddit=SUBREDDIT     : Set the subreddit that the options will operate.
