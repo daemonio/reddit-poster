@@ -203,7 +203,7 @@ def to_date_ago(seconds):
     
     return (year, 'years')
 
-def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=30):
+def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=10):
     sub = reddit.subreddit(subreddit)
     current_timestamp = time.time()
 
@@ -212,10 +212,10 @@ def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=30):
 
     if new_or_search == True:
         SUBMISSION_LIST = sub.new(limit=limit_new)
-        pass
     else:
         SUBMISSION_LIST = sub.search(search, limit=limit_new)
 
+    limit_p = int(limit_new)
     #for submission in sub.new(limit=limit_new):
     for submission in SUBMISSION_LIST:
         t = current_timestamp - submission.created_utc
@@ -228,6 +228,11 @@ def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=30):
 
         print 'Title: {0}\nUrl: {1}\nScore: {2}\nAuthor: {3}\nPosted: {4} {5} ago\n\n'.format(
                 title, url, score, author, d1, d2)
+
+        # TODO: In my tests the "limit" parameter of PRAW API did not work.
+        limit_p -= 1
+        if limit_p == 0:
+            break
 
 def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
     sub = reddit.subreddit(subreddit)
@@ -322,9 +327,9 @@ parser.add_option('--command-after', action="store", dest="command",
         help='Command to execute (only once) when everything is submitted.')
 parser.add_option('--subreddit', action="store", dest="subreddit",
         help='Set the subreddit that the options will operate.')
-parser.add_option('--get-best', action="store_true", default=False,
+parser.add_option('--best', action="store_true", default=False,
         help='Print the "best" time to post in --subreddit.')
-parser.add_option('--get-new', action="store", dest='new',
+parser.add_option('--new', action="store", dest='new',
         help='Get the first N new posts of the --subreddit.')
 parser.add_option('--search', action="store", dest='search',
         help='Terms to search in --subreddit.')
@@ -335,13 +340,13 @@ OPT_DRY_RUN=options.dry_run
 OPT_QUIT=options.quit_after
 OPT_CMD_AFTER=options.command
 OPT_SUBREDDIT=options.subreddit
-OPT_BEST=options.get_best
+OPT_BEST=options.best
 OPT_SEARCH=options.search
 OPT_NEW=options.new
 
 # Validating parameters.
 if (OPT_SUBREDDIT == None) and (OPT_BEST or OPT_NEW != None or OPT_SEARCH != None):
-    print '[+] Error: When using --get-best or --get-new or --search, '
+    print '[+] Error: When using --best or --new or --search, '
     print '--subreddit must be used.'
 
     sys.exit()
@@ -354,7 +359,7 @@ if OPT_DRY_RUN:
         MyPrint.alert('[+] Dry run mode. Nothing will be altered or posted.')
 
 # Treating options.
-# --get-best
+# --best
 if OPT_BEST:
     reddit = praw_login(BOT_NAME)
 
@@ -366,7 +371,7 @@ if OPT_BEST:
 
     sys.exit()
 
-# --get-new and --get-search
+# --new and --search
 if OPT_NEW != None or OPT_SEARCH != None:
     reddit = praw_login(BOT_NAME)
 

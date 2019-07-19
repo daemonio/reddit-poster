@@ -20,7 +20,7 @@ I put my PRAW configuration in `~/.config/praw.ini`. Here's a example of the fil
     username=
 
 Fill the missing values with your own configuration. Don't forget to set the `BOT_NAME`
-in `poster.py` and in `search.py` (for this example `BOT_NAME='mybot'`)
+in `poster.py` (for this example `BOT_NAME='mybot'`)
 
 # How to use
 
@@ -118,13 +118,14 @@ value must be changed accordingly.
     --command-after=COMMAND   : Command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
     --subreddit=SUBREDDIT     : Set the subreddit that the options will operate.
-    --get-best                : Print the "best" time to post in --subreddit.
-    --get-new  N              : Get the first N new posts of the --subreddit.
+    --best                    : Print the "best" time to post in --subreddit.
+    --new  N                  : Get the first N new posts of the --subreddit.
     --search=SEARCH           : Term to search in --subreddit.
 
 Example:
 
     ./poster.py --subreddit natureismetal --search 'honey+badger+snake'
+
 # Database 'reddit.db'
 
 The DB is a file under sqlite3 format. Its schema is simple, just type:
@@ -132,9 +133,3 @@ The DB is a file under sqlite3 format. Its schema is simple, just type:
     sqlite3 reddit.db '.schema'
 
 To learn more about using sqlite3 in python just search it up in duckduckgo.
-
-# search.py
-
-This the reddit search engine in a script form. I use it before posting to avoid reposts.
-
-    ./search.py natureismetal 'honey+badger+snake'
