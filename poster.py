@@ -380,7 +380,11 @@ if OPT_NEW != None or OPT_SEARCH != None:
     MyPrint.warn('[+] Getting {0} new posts of : {1}'.format(
         OPT_NEW, OPT_SUBREDDIT))
 
-    reddit_get_posts(reddit, new_or_search, OPT_SUBREDDIT, OPT_SEARCH, limit_new=OPT_NEW)
+    LIMIT_POSTS = OPT_NEW
+    if OPT_SEARCH:
+        LIMIT_POSTS = 30
+
+    reddit_get_posts(reddit, new_or_search, OPT_SUBREDDIT, OPT_SEARCH, limit_new=LIMIT_POSTS)
 
     sys.exit()
 
