@@ -327,7 +327,7 @@ parser.add_option('--command-after', action="store", dest="command",
         help='Command to execute (only once) when everything is submitted.')
 parser.add_option('--subreddit', action="store", dest="subreddit",
         help='Set the subreddit that the options will operate.')
-parser.add_option('--best', action="store_true", default=False,
+parser.add_option('--print-best', action="store_true", default=False,
         help='Print the "best" time to post in --subreddit.')
 parser.add_option('--new', action="store", dest='new',
         help='Get the first N new posts of the --subreddit.')
