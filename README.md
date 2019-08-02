@@ -118,7 +118,7 @@ value must be changed accordingly.
     --command-after=COMMAND   : Command to execute (only once) when everything is submitted.
                                 Useful for "reboot".
     --subreddit=SUBREDDIT     : Set the subreddit that the options will operate.
-    --best                    : Print the "best" time to post in --subreddit.
+    --print-best              : Print the "best" time to post in --subreddit.
     --new  N                  : Get the first N new posts of the --subreddit.
     --search=SEARCH           : Term to search in --subreddit.
 
