@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # TODO: try/catch stuff
+# TODO: python 3
 
 import time
 import sys
@@ -28,7 +29,7 @@ BOT_NAME            = 'mybot' # modify this
 class DB:
     def __init__(self, DB_FILE):
         self.dbfile    = DB_FILE
-	self.conn      = sqlite3.connect(self.dbfile)
+        self.conn      = sqlite3.connect(self.dbfile)
         self.cursor    = self.conn.cursor() 
 
     def close(self):
@@ -46,7 +47,7 @@ class DB:
     def select_print(self, query, parameters):
         self.cursor.execute(query, parameters)
         for t in self.cursor.fetchall():
-            print t
+            print (t)
 
 class POST:
     def __init__(self, status, schedule, subreddit, title, url, tim):
@@ -105,7 +106,7 @@ class DBREDDIT(DB):
          
     def _debug(self, msg):
         if self.debugflag:
-            print '[+] DEBUG: ' + msg
+            print ('[+] DEBUG: ' + msg)
 
     def show(self):
         #TODO: empty tuple on second parameter?
@@ -149,19 +150,19 @@ class Print():
         pass
 
     def info(self, msg):
-        print Fore.MAGENTA + msg + Style.RESET_ALL
+        print (Fore.MAGENTA + msg + Style.RESET_ALL)
 
     def warn(self, msg):
-        print Fore.MAGENTA, Back.WHITE + msg + Style.RESET_ALL
+        print (Fore.MAGENTA, Back.WHITE + msg + Style.RESET_ALL)
 
     def alert(self, msg):
-        print Fore.WHITE, Back.RED + msg + Style.RESET_ALL
+        print (Fore.WHITE, Back.RED + msg + Style.RESET_ALL)
 
     def event(self, msg):
-        print Fore.YELLOW, Back.WHITE + msg + Style.RESET_ALL
+        print (Fore.YELLOW, Back.WHITE + msg + Style.RESET_ALL)
 
     def show(self, msg):
-        print Fore.GREEN + msg + Style.RESET_ALL
+        print (Fore.GREEN + msg + Style.RESET_ALL)
 
 def to_hour(seconds):
     return round(seconds/(60 * 60))
@@ -226,8 +227,8 @@ def reddit_get_posts(reddit, new_or_search, subreddit, search, limit_new=10):
         author = submission.author
         url    = submission.url
 
-        print 'Title: {0}\nUrl: {1}\nScore: {2}\nAuthor: {3}\nPosted: {4} {5} ago\n\n'.format(
-                title, url, score, author, d1, d2)
+        print ('Title: {0}\nUrl: {1}\nScore: {2}\nAuthor: {3}\nPosted: {4} {5} ago\n\n'.format(
+                title, url, score, author, d1, d2))
 
         # TODO: In my tests the "limit" parameter of PRAW API did not work.
         limit_p -= 1
@@ -265,7 +266,7 @@ def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
 
 def reddit_submit(reddit, _subreddit, _title, _url):
     sub = reddit.subreddit(_subreddit)
-    print sub.submit(title=_title, url=_url)
+    print (sub.submit(title=_title, url=_url))
 
 def read_post_file(filename):
     POSTS_LIST = []
@@ -327,7 +328,7 @@ parser.add_option('--command-after', action="store", dest="command",
         help='Command to execute (only once) when everything is submitted.')
 parser.add_option('--subreddit', action="store", dest="subreddit",
         help='Set the subreddit that the options will operate.')
-parser.add_option('--print-best', action="store_true", default=False,
+parser.add_option('--best', action="store_true", default=False,
         help='Print the "best" time to post in --subreddit.')
 parser.add_option('--new', action="store", dest='new',
         help='Get the first N new posts of the --subreddit.')
@@ -346,8 +347,8 @@ OPT_NEW=options.new
 
 # Validating parameters.
 if (OPT_SUBREDDIT == None) and (OPT_BEST or OPT_NEW != None or OPT_SEARCH != None):
-    print '[+] Error: When using --best or --new or --search, '
-    print '--subreddit must be used.'
+    print ('[+] Error: When using --best or --new or --search, ')
+    print ('--subreddit must be used.')
 
     sys.exit()
 
