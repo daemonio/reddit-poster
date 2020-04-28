@@ -381,7 +381,7 @@ if OPT_NEW != None or OPT_SEARCH != None:
     MyPrint.warn('[+] Getting {0} new posts of : {1}'.format(
         OPT_NEW, OPT_SUBREDDIT))
 
-    LIMIT_POSTS = OPT_NEW
+    LIMIT_POSTS = int(OPT_NEW)
     if OPT_SEARCH:
         LIMIT_POSTS = 30
 
