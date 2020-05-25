@@ -25,6 +25,7 @@ PRAW_RENEW_AUTH     = 7200 # renew praw auth every 2hr
 TIME_POST_SAME_SUB  = 7200 # used when two or more "best" posts.
 DRY_RUN_BEST_TIME   = 120  # used when using --dry-run
 BOT_NAME            = 'mybot' # modify this
+BEST_POST_AGE       = 13 #the age of the post when using "best"
 
 class DB:
     def __init__(self, DB_FILE):
@@ -257,8 +258,9 @@ def reddit_calc_timestamp_best(reddit, subreddit, limit_new=30):
         # submissions are already in order (the most recent first).
         # the first who matches will bring the longest timestamp.
         # TODO: using 88 instead of 100.
-        if hour < 15 and (score/hour) > 88:
-            best_timestamp = current_timestamp + (15 - hour)*3600 + 2*60
+
+        if hour < BEST_POST_AGE and (score/hour) > 88:
+            best_timestamp = current_timestamp + (BEST_POST_AGE - hour)*3600 + 2*60
 
             break
 
